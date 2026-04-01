@@ -1,0 +1,33 @@
+requirements.txt
+rewuirements.txt
+01.04.2026 TJP
+
+Pre-requires: LinuxCNC,  Python3
+
+Files Installation:
+	Copy the executable sedm to your path
+		I have a RIP. so I copy sedm to:
+			~/linuxcnc-source-dir/bin
+		For a installed LinuxCNC, place sedm on your PATH
+			type   echo $PATH in a terminal 
+			to see where you can store sedm
+	Copy the sedm directory your installed linuxcnc ( NOT RIP)
+		or to a RIP
+			eg: ~/linuxcnc-source-sir/configs/sim/axis/
+			( place the directory into the ....axis/ dir)
+
+To run the sedm config:
+	for a RIP, open a terminal and set the environment:
+		cd
+		cd <your RIP>
+		. sc<TAB>/ri<TAB>
+		linuscnc
+		(thwn use picker to choose sim/axis/sedm
+	or
+		Run linuxcnc and supply the path to where you stored sedm dir
+			linuxcnc ~/myssedmdir/sedm.ini
+	or if you have no RIP, but have linuxcnc installed...
+		Plcae the sedm dir into
+			/usr/share/doc/linuxcnc/examples/sample-configs/sim/axis/
+		and choose sedm from picker's 'supplied configs' 
+		( this will create a Desktop icon & link to use later.
