@@ -1,4 +1,5 @@
 ;example.ngc
+; 09.04.2026 make NO wigl, to test pstraight plunge {EEK
 ; see notes below peogram
 ; try it as is before modifying\; always qoek on a copy
 ;
@@ -9,8 +10,8 @@
 o200 sub
 	M66 E0 L0           ;NEED QBUSTER AND sleep(0.010) in rComp BOTH
 	M199                ; begin sedm motion control
-	M162 P-1.304 Q1.0   ; FullDepth , RPlane 
-	M163 P0 Q0.05       ; OrbType SQR, Wigl radius
+	M162 P-0.304 Q1.0   ; FullDepth , RPlane 
+	M163 P0 Q0.0       ; OrbType SQR, Wigl radius
 	M160 P19 Q0.508     ; etabnum, MsrdUNS
 	M161 P12 Q10        ; BegNR EndNR (this examle only 'finheshes' a cut for bervity.
 	M00                 ; neccesary for ExternalOffsets
