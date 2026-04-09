@@ -4,6 +4,7 @@
 loadusr -Wn techGui  pyvcp -c techGui ./sedm.xml
 loadusr -Wn EDpanel pyvcp   -g 200x150+800+50 -c EDpanel ./sedmpause.xml
 loadusr -W sedm
+#03.04.2026 could not get TkEMC to work with these 2 pyvcp panels Nor the python comp
 #==============end loads===============
 setp sedm.xyzSCALEfIN 0.001
 setp sedm.freebies   20 #12
@@ -56,3 +57,7 @@ net ForzFWD  sedm.ForceFWD  EDpanel.ForzFWD
 net ForzHOLD sedm.ForceHOLD EDpanel.ForzHOLD
 net ForzBWD  sedm.ForceBWD  EDpanel.ForzBWD
 net inpo motion.in-position sedm.inpo
+
+loadusr halmeter -s pin sedm.ctr
+
+

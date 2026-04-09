@@ -1,4 +1,9 @@
-;tast4TST.ngc
+;tast4TST02.ngc
+; this tests SPO = abso 0,0,0 as well as rel 0,0,0
+;
+; TODO in other vrsns i has set Rplane at +0.5 AND +1.0 in samne nngc  NFG
+; TODO find how to send Mcode an o-word #N var
+;
 ; test for tall skinny triangles
 ; unwanted phantom luches to SP
 ; i added a trap in doMove()
@@ -17,6 +22,7 @@
 o200 sub
 	M66 E0 L0           ;NEED QBUSTER AND sleep(0.010) in rComp BOTH
 	M199                ; begin sedm motion control
+	; TODO in other vrsns i has set Rplane at +0.5 AND +1.0 in samne nngc  NFG
 	M162 P-1.304 Q1.0   ; FullDepth , RPlane 
 	M163 P0 Q0.05       ; OrbType SQR, Wigl radius
 	M160 P34 Q0.254     ; etabnum, MsrdUNS
@@ -35,25 +41,29 @@ F5000                     ;LinuxCNC wil likely use Radoi move
 ;
 G10L2P1X0Y0Z0             ; UNSHIFT, cut posns will be G43 msr and DRO reports relative value
 G00Z5                     ; get fAR above work
+
+T1                        ; use a tiny tool do path is visble
+M6
 ;
 #1 = 0 (counter init)
-#2 = 100 (limit)
+#2 = 10 (limit)
 #3 = +3.000               ; CPlane  small for more test s per hr
-#4 = +0.5                 ; RPlane  small for more test s per hr
+#4 = +1.0                 ; RPlane  small for more test s per hr
 ;
 o110 while [#1 LT #2]
 	;
 	g10l2p1 x0 y0 z0; UNSHIFT
 	G0Z#3; CPlane
 	;
-	g10l2p1 x1.0 y0 z2.0     ; DATUM for cut #1
+	g10l2p1 x0.0 y0 z0;  no offet here -1.0 ; msr from -Rplanes so 0 means AT abso z0    DATUM for cut #1
+	;  TODO ^^^ how to say -#4 ???
 	g0x0y0                ; rapid to bore center
-	z#4                   ; rapid to RPlane rel to  DATUM
+	z0; no offset here#4                   ; should move to abso z 0   rapid to RPlane rel to  DATUM
 	;
 	o200 call             ;
 	;
 	g10l2p1 x0 y0 z0      ;UNSHIFT
-	G0Z#3                 ;rapid CPlane abso mc coords
+	G0Z0;no offset here#3                 ;rapid CPlane abso mc coords
 	;
 	#1 = [#1 + 1]         ; bump counter
 o110 endwhile

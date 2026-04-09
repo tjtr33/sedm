@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 #
+# About this file:
+#  This file is teh soutce for the sedm comp
+#  This file is also the executable
+#  This file resides in my RIP/bin
+#  This file also resides in 
+#   my local git repo 
+#   in ~/Downloads/sedm/sedm/CopyThisToYourPATH/sedm
+#
+# Changes 09.04.2026
+# missing do PeekLine code
+# sedm.EDpeek cleared too seeom
+# removed 2 unused lines in doXitL()
 # -------------------------------------------------------------------->
 # sedm.py sedm
 #
@@ -26,24 +38,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -------------------------------------------------------------------->
-# TODO 01.04.2026
-# the is a SCRTCHsedm31032026.oy
-# where i look at state machine...
 #
-#1 the state machine entry and exit condfitions are muffled
 #
-#2 teh waitM199 is not tested for
-# near try: at bottom of this file....
-#   while EDMmode == True:
-#		# vvv flag set by M199, so making state waitM199 useless
-#		if sedm.isEna == True:
-# so the waitM199 state is not usedull, but setting sedm.isEna is necc ( fone by M100)
-# i can remove waitM199 state
-#
-#3 the sequence / states have gaps  8-???
-#
-#*
-
 import linuxcnc
 import hal
 import time
@@ -101,8 +97,11 @@ WaitNewNR                = 12
 CleanUpPutAway           = 13
 # ------ end states of state macghine
 
-#01.04.2026 DD  ctr or trmnl peints
+#01.04.2026 Debug  ctr for trmnl prints, number of loop executions
 tctr = 0
+
+#02.04.2026 try catcg TST
+lastPosn = ( (0,0,0))
 
 # ----- end of constants -------
 
@@ -766,8 +765,9 @@ def setGen(NRval):
 		#sedm.GVHI = EtabDict[NRstr][3]
 		#sedm.GVLO = EtabDict[NRstr][4]
 		# TODO  vvv for testing
-		sedm.GVHI =   50#35#40# 45# 2 #45 #
-		sedm.GVLO =   40#28#30# 35# 1 #40 #
+		# TODO dont set these in comp .py code, set in post hal
+		sedm.GVHI =  50 #0 will force FWD  50#35#40# 45# 2 #45 #
+		sedm.GVLO =  40 #0 will force FWD40#28#30# 35# 1 #40 #
 		#
 		sedm.TON =   EtabDict[NRstr][5]  
 		sedm.TOF =   EtabDict[NRstr][6]  
@@ -1034,7 +1034,6 @@ def getEvalPV(L,myNdx ): # rtns FWD HOLD BWD for EDM
 	# for debugm i pu EDMgrade on a pin do halmeter can onserve
 	# 03.01.2026 straight kubne bore alwayts FWD , 1wiglZneg gets bwds gets holds
 	#
-	
 	SPO = ( (0,0,0) )
 	"""
 	# This dunction is central to the entire system
@@ -1067,7 +1066,15 @@ def getEvalPV(L,myNdx ): # rtns FWD HOLD BWD for EDM
 		# 01.04.2026 sonmt turn off tiil RESUME or WUIT chosen
 		#sedm.EDpeek = False
 		
+		peekL = []
+		retL = []
+		peekL, retL = mkPeekL( L[myNdx] )
+		# end missing 09.04.2026
 		doExitL(peekL)
+		
+		# do AFTER at SPO, before next inspection of posnnow == spo
+		sedm.EDpeek = False
+
 		#
 		# at SPO, user just did PEEK
 		while 1: 
@@ -1623,35 +1630,112 @@ def doExitL( xL): # no  getEvalPV, just cloicck out stepsxl[0] is
 	badLim = 0
 	while xNdx < goodLim: #
 		#
-		oldP = xL[ xNdx ]
+		#09.04.2026 vvv useless, looks like part of old adjacency tetsts (  abd(thisPosn[L] - oldPosn[L]) <= 1
+		# IS useless oldP = xL[ xNdx ]
+		
 		xNdx += 1
 		newP = xL[ xNdx ]
 		#
 		doMove( newP )
-		time.sleep(.001)
+		
+		#09.04.2026 vvv looks redundant, should be in doMove()
+		# IS redundant time.sleep(.001)
 #
 def doMove( posn): # caller must make sure podn is adjacen to last
-	global tctr #01.04.2026 for dbg trmnl prints
-	# 666  a diff between the trml and the halmeter
-	# menas ????
-	
-	#31.03.2026 test for tall skinny triangles
-	if posn == ( ( 0,0,0 ) ):
+	global tctr #01.04.2026 for dbg trmnl prints, hoe many loop iters
+	global lastPosn
+	#
+	# RE TST problem
+	# on 1 TST i can see it occurred while ob a orbit path detour line
+	# a snall dist from peri, 
+	# the trace it jumpred off line
+	# trace went to SPO
+	# trace rtnd to path detour line ata slighytly diff spot,
+	# looks like 1 unit away
+	# did not leave a V with gap on detour,
+	# instead was clode, like it movred BACK to a prev pos...noty sure
+	#BUT maybe some adjavency testing inside that func would be useful\#
+	#see doDetourLegL( legL, BegNdx)
+	# NB it starts at AnkleNdx
+	#
+	#####################
+	# enable trap A B or C, commernt others
+	####################
+	# Trap B  checks passed posn, can check befgore any move
+	# ifposn[toolAxis] ==0
+	#  AND state != CUPA, sedm.Peek is false
+	# REWSULT TST occurd and not trapped 
+	# so tap B is ineffective
+	# tested w GVHI - GVLO 0 do always FWD
+	#  got a TST , no trap triggered
+	# tested w
+	if posn[sedm.ToolAxis] == 0: # catcxh any w toolaxcis valye of 0
 		tctr += 1
 		print(1617,"tctr is ",tctr)
-		if sedm.state != CleanUpPutAway:
-			# vvv NG disallows PEEK
-			if sedm.EDpeek == False:
-				print(1626,"SPO cmdd and NOT in CUPA")
-				trap()
-	# 02.01.2026 neccc   this is the cmd to move  to posn
-	#31.03.2026 this is the onl;y plave where sedm.XOffsetCmd is given value
-	# there are 2 more places but they READ data * should ve no problem)
+		#  iuf NOT CUPA and NOT PEEK
+		if ( sedm.state != CleanUpPutAway ):
+			print("state is NOT CUPA ---- this is a problem")
+		if (sedm.EDpeek == True):
+			print("sedm.EDpeek is True --- ok")
+		if (sedm.QuitHit == True) or (sedm.BwdMaxHit == True):
+			print("QuitHit or BwdMaxHit true ---- not a problem")
+		#
+		if ( ( sedm.state != CleanUpPutAway )	# 8 waitPlunge
+		and (sedm.EDpeek != True) 				# False  NG i expecte dthis stayed True Til after Resume or Quit preszsed
+		and (sedm.QuitHit != True) 				# False
+		and (sedm.BwdMaxHit != True) ):			# False 
+					print(1716,"in doMove, posn ",  posn," is SPO and should not be")
+					trap()
+	####################
+	# coomon vvv move to posn
 	sedm.XOffsetCmd = posn[0]
 	sedm.YOffsetCmd = posn[1]
 	sedm.ZOffsetCmd = posn[2]
-	# !?!? NECC yes !!!thius is MIN and NECC
-	time.sleep(0.001)
+	#
+	# common to all
+	time.sleep(0.010)# the time does nmot seem critical 
+	####################
+	"""
+	# trap A 
+	#  if lastPosn vs posn > 1 step in any axis involved
+	dpx = abs(lastPosn[0] - posn[0])
+	dpy = abs(lastPosn[1] - posn[1])
+	dpz = abs(lastPosn[2] - posn[2])
+	#
+	lim = 1
+	if ( (dpx > lim) or (dpy > lim) or (dpz > lim) ):
+		print(posn,lastPosn)
+		print("dpx ",dpx," dpy ",dpy,"dpz ",dpz)
+		# set window so always true and try again ( if prob is in deturm this will avaoid prob)
+		trap()
+	else:
+		lastPosn = posn
+	"""
+	#
+	"""
+	####################
+	# TRAP C
+	# after move,
+	# trap if actualPosn != posn
+	s = linuxcnc.stat()
+	s.poll()
+	xnowi = int( round(s.actual_position[0])) 
+	ynowi = int( round(s.actual_position[1]))
+	znowi = int( round(s.actual_position[2]))
+	actlPosn = ( (xnowi,ynowi,znowi))# only 1st 3 axis today
+	actlPosn = ( (xnow,ynow,znow))# only 1st 3 axis today
+	#
+	while actlPosn != posn:
+		print(1735,"posn != actlPosn")
+		# wait a but for posn to be acxhieved
+		time.sleep(0.01)
+		# re check posn
+		s.poll()
+		xnowi = int( round(s.actual_position[0])) 
+		ynowi = int( round(s.actual_position[1]))
+		znowi = int( round(s.actual_position[2]))
+		actlPosn = ( (xnowi,ynowi,znowi))# only 1st 3 axis today
+	"""
 #
 def getAtctr(posn):
 	#rtns atctr CtrPosn
@@ -2157,8 +2241,12 @@ def doDetourWiglL( DetourWiglL,ankleNdx):
 				sedm.BwdMaxHit = True
 				return BWD # yes FWD means successm bad wors, correct axtion
 			#
-			newP = DetourWiglL[wiglDtrNdx] # get  newP from list, ndx already INCd
-			doMove( newP)
+			# 03.04.2026 this vvv is not executed if FWD
+			# i think the inent is wrong
+		newP = DetourWiglL[wiglDtrNdx] # get  newP from list, ndx already INCd
+		if newP[sedm.ToolAxis] == 0:
+			print(2285,"in doDetourWigl, newP[sedm.ToolAxis] == 0")
+		doMove( newP)
 #
 def doDetourLegL( legL, BegNdx): # wasankleNdx):
 	#
@@ -2194,6 +2282,7 @@ def doDetourLegL( legL, BegNdx): # wasankleNdx):
 				######## DONT DEC ndx if ndx == 0
 				detourLegLndx -= 1 # FWD is DEC  towards TOE towrads PeriPath Towars ndx == 0
 				newP = legL[detourLegLndx]
+				#
 		elif nextDir == BWD:   # BWD is INC ndx  BWD is tiwards SPO , ndx  gets larger
 			if (detourLegLndx == badLim): # and  (stepNum != 0): # backed up to SPO
 				sedm.BwdMaxHit = True
@@ -2202,6 +2291,13 @@ def doDetourLegL( legL, BegNdx): # wasankleNdx):
 				#oldP = legL[ndx]
 				detourLegLndx += 1 # BWD is towards HIP. ndx is larger
 				newP = legL[detourLegLndx]
+				#
+		#03.04.2026 trp newP ~= SPO
+		if (nextDir != HOLD):
+			if newP[sedm.ToolAxis] == 0:
+				print(2327,"in doDetourLegL, newP[sedm.ToolAxis] == 0")
+				trap()
+		#
 		if (nextDir != HOLD):
 			
 			""" re TST nevcer tyrihghered

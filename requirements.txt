@@ -9,8 +9,8 @@ Files Installation:
 		I have a RIP. so I copy sedm to:
 			~/linuxcnc-source-dir/bin
 		For a installed LinuxCNC, place sedm on your PATH
-			type   echo $PATH in a terminal 
-			to see where you can store sedm
+			likrly, thus vvv will do
+			/usr/local/bin
 	Copy the sedm directory your installed linuxcnc ( NOT RIP)
 		or to a RIP
 			eg: ~/linuxcnc-source-sir/configs/sim/axis/
