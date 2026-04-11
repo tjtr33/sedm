@@ -2,10 +2,9 @@
 # 25.03.2026 cleaned
 #==============begin loads===============
 loadusr -Wn techGui  pyvcp -c techGui ./sedm.xml
-# 09.04.2026 no spcl size loadusr -Wn EDpanel pyvcp   -g 200x150+800+50 -c EDpanel ./sedmpause.xml
-# loadusr -Wn EDpanel pyvcp -c EDpanel ./sedmpause.xml
 loadusr -W sedm
-#03.04.2026 could not get TkEMC to work with these 2 pyvcp panels Nor the python comp
+
+#03.04.2026 could not get TkEMC to work with pyvcp panels Nor the python comp
 #==============end loads===============
 setp sedm.xyzSCALEfIN 0.001
 setp sedm.freebies   20 #12
@@ -49,26 +48,19 @@ net eox sedm.XOffsetCmd  axis.x.eoffset-counts
 net eoy sedm.YOffsetCmd  axis.y.eoffset-counts
 net eoz sedm.ZOffsetCmd  axis.z.eoffset-counts
 net die sedm.abort halui.abort
-# 09.04.2026 move peek to techgui
-#net hot     sedm.disableOsc  EDpanel.EDpeek.disable
-net hot     sedm.disableOsc  techGui.EDpeek.disable
 
-#net EDpk  EDpanel.EDpeek   sedm.EDpeek
+#11.04.2026 much cleaner way to grey.ungrey disable/enable PEEK RETURN QUIT btns
+net  enaPeek   sedm.disablePeek  techGui.EDpeek.disable
+net  enRQbtns  sedm.disableRQ    techGui.EDreturn.disable techGui.EDquit.disable 
+
 net EDpk  techGui.EDpeek   sedm.EDpeek
-
-#net EDret EDpanel.EDreturn sedm.EDreturn
 net EDret techGui.EDreturn sedm.EDreturn
-
-#net EDq   EDpanel.EDquit   sedm.EDquit
 net EDq   techGui.EDquit   sedm.EDquit
 
 net dMsrdUNSf   sedm.MsrdUNSf
-# 09.04.2026 2 btns and signals removed from gui
-#net ForzFWD  sedm.ForceFWD  EDpanel.ForzFWD
-#net ForzHOLD sedm.ForceHOLD EDpanel.ForzHOLD
-#net ForzBWD  sedm.ForceBWD  EDpanel.ForzBWD
 net inpo motion.in-position sedm.inpo
 
-loadusr halmeter -s pin sedm.ctr
+#loadusr halmeter -s pin sedm.disablePeek
+
 
 
